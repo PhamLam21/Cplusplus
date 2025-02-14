@@ -2,36 +2,38 @@
 
 using namespace std;
 
-class car {
+class PhanSo {
 
-	static car oto1;
-	car* oto2;
+private:
+	int mau;
+	int tu;
+
 public:
-	string brand;
-	string color;
+	//Khoi tao
+	PhanSo(int _mau = 0, int _tu = 0) {
+		mau = _mau;
+		tu = _tu;
+	}
+	//Huy
+	~PhanSo() {}
 
-	void showColor();
+	PhanSo operator + (PhanSo ps) {
+		PhanSo ketQua;
+		ketQua.tu = tu * ps.mau + mau * ps.tu;
+		ketQua.mau = mau * ps.mau;
+		return ketQua;
+	}
 
-	void showInfo() {
-		cout << "Brand: " << brand << endl;
-		cout << "Color: " << color << endl;
+	void display(PhanSo a, PhanSo b, PhanSo ketqua) {
+		cout << a.tu << "/" << a.mau << " + " << b.tu << "/" << b.mau << " = " << ketqua.tu << "/" << ketqua.mau << endl;
 	}
 };
 
-void car::showColor() {
-	cout << "Color: " << car::color << endl;
-}
-
 int main() {
-	int a = 2;
-	car lambogini;
-	lambogini.brand = "Lambogini";
-	lambogini.color = "Yellow";
-
-	//cout << "Mau xe: " << lambogini.color << endl;
-
-	lambogini.showInfo();
-	lambogini.showColor();
+	PhanSo ps1(3, 2);
+	PhanSo ps2(5, 1);
+	PhanSo ps3 = ps1 + ps2;
+	ps3.display(ps1, ps2, ps3);
 
 	return 0;
 }

@@ -127,3 +127,223 @@ int main(){
 
 }
 ```  
+## Function overloading  
+Đây là định nghĩa liên quan đến nạp chồng hàm, được sử dụng khi ta muốn định nghĩa nhiều hàm cùng tên có cách xử lý giống nhau nhưng khác nhau về:
+- Số lương tham số
+- Kiểu dữ liệu trả về
+- Kiểu dữ liệu tham số  
+
+Không thể nạp chồng khi:
+- Chỉ khác nhau mỗi kiểu trả về
+- Giống kiểu tham số và số lượng tham số truyền vào truyền
+- Không thể nạp chồng hàm static   
+
+Function overloading xảy ra tại thời điểm compile time 
+```  
+class tinh_toan{
+    public:
+    /*Overloading method*/
+        int tong(int a, int b){ 
+            return a + b;
+        }
+        double tong(double a, double b){
+            return a + b;
+        }
+        int tong(double a, double b, double c, double d){
+            return (int)a + b + c+ d;
+        }
+};
+int main(){
+    tinh_toan tinh;
+    cout << "tong 2 so integer: << tinh.tong(12, 14) << endl;
+    cout << "tong 2 so double: << tinh.tong(12.12, 14.42) << endl;
+    cout << "tong 4 so double: << tinh.tong(9.23, 14.12, 17.21, 89.23) << endl; 
+    return 0;
+}
+```  
+## Operator overloading  
+**Định nghĩa:** Cơ chế cho phép ta định nghĩa lại các toán tử cơ bản như +,-,*,/ thành các kiểu đặc biệt để thao tác được trên các kiểu dữ liệu không phải nguyên thủy ví dụ như struct hay class   
+
+**Ứng dụng:** Khi ta cần trực quan và đơn giản hóa trong việc đọc hiểu code ví dụ thay vì viết v3 = v1.add(V2) ta có thể viết v3 = v1 + v2, thông quan việc định nghĩa lại toán tử + để trình biên dịch có thể hiểu được    
+
+**Cú pháp:**  
+```  
+<return type> operator symbol (param){
+    //logic toán 
+}
+```  
+- operator: từ khóa để nạp chồng toán tử
+- symbol: toán tử muốn nạp chồng, phải là nằm trong phạm vi các toán tử nguyên thủy như +,-*,/  
+
+**Ví dụ:** Nạp chồng toán tử + để cộng 2 phân số  
+```  
+class Phanso{
+    private:
+        int mauso;
+        int tuso;
+    public:
+    //khởi tạo giá trị mặc định ban đầu 
+        Phanso(int mauso = 0, int tuso = 0){
+            this->mauso = mauso;
+            this->tuso = tuso;
+        }
+        Phanso operator + (Phanso other){
+            Phanso ketqua;
+            ketqua.mauso = this->mauso * other.tuso + this->tuso * other.mauso;
+            ketqua.tuso = this->tuso * other.tuso;   
+            return ketqua;
+        }  
+        void display(Phanso a, Phanso b, Phanso ketqua){
+            cout << a.mauso << "/" << a.tuso << " + " << b.mauso << "/" << b.tuso << " = " << ketqua.mauso << "/" << ketqua.tuso << endl;
+        }
+};
+
+int main(){
+   Phanso ps1(12, 42);
+   Phanso ps2(14, 11);
+   Phanso ps3 = ps1 + ps2;
+   ps3.display(ps1, ps2, ps3);
+   return 0;   
+}
+```  
+## Static & virtual 
+### Static
+- các method và property được sử dụng bằng cách gọi trực tiếp thông qua tên class kết hợp với toán tử phạm vi ::
+- Static property chỉ được cấp phát địa chỉ để sử dụng khi ta gán giá trị bên ngoài class (lúc này ta mới sử dụng được property này)
+- Chỉ có các static method mới được phép truy cập đến static property  
+- Static property là thể hiện của class có thể truy cập qua "class"::"var"  
+
+Ví dụ: Ta sẽ dùng static property để lưu giá trị đếm, và truy cập nó thông qua static method.  
+```  
+class Person{
+  private:
+    string name;
+    int age;
+    static int total; //chỉ có thể truy cập thông qua static method
+  public:
+    Person(string _name , int _age){
+        name = _name;
+        age = _age;
+        total += 1; //đếm só lượng object mỗi lần khởi tạo 
+    }
+    static void print_total(){
+        cout << "total of objects: << total << endl;
+    }
+};
+int Person :: total = 0 //cấp phát địa chỉ và khởi tạo giá trị lưu ở data segment
+int main(){
+    Person person1("Duy Pham",30);
+    Person person2("Hoang Le",38);
+    Person person3("Tuan Dinh",22);
+    Person :: print_total();
+}
+```  
+    - Kết quả in ra ta được total of objects: 3  
+Ứng dụng: Khi ta cần chia sẻ cấu hình cài đặt giống nhau giữa các ngoại vi trong 1 hệ thống nhúng. Ví dụ như cài đặt thông số baudrate giống nhau cho nhiều bộ UART  
+```  
+#include <iostream>
+
+class UART {
+private:
+    static int baudRate; // Shared property for baud rate
+    int instanceId;      // Each UART has a unique ID
+
+public:
+    UART(int id) : instanceId(id) {}
+
+    // Static method to set baud rate
+    static void setBaudRate(int rate) {
+        baudRate = rate;
+    }
+
+    // Static method to get baud rate
+    static int getBaudRate() {
+        return baudRate;
+    }
+
+    // Non-static method to display UART details
+    void displayDetails() {
+        std::cout << "UART Instance ID: " << instanceId
+                  << ", Baud Rate: " << baudRate << std::endl;
+    }
+};
+
+// Define static member outside the class
+int UART::baudRate = 9600; // Default baud rate
+
+int main() {
+    UART uart1(1); // UART instance 1
+    UART uart2(2); // UART instance 2
+
+    // Set shared baud rate using static method
+    UART::setBaudRate(115200);
+
+    // Each instance will use the same baud rate
+    uart1.displayDetails();
+    uart2.displayDetails();
+
+    // Retrieve shared baud rate
+    std::cout << "Shared Baud Rate: " << UART::getBaudRate() << std::endl;
+
+    return 0;
+}
+```  
+### Virtual function (Hàm ảo)
+- Khi 1 hàm được định nghĩa là virtual nó có thể được ghi đè (override) trong class con, để cung cấp cách triển khai cụ thể
+- Khi gọi 1 hàm ảo thông qua 1 con trỏ/tham chiếu đến các lớp con. Hàm ảo tương ứng sẽ được gọi ra dựa trên object mà nó trỏ tới, chứ không dựa vào kiểu dữ liệu mà nó được định nghĩa
+- Nếu lớp con không cung cấp cách triển khai cụ thể thì nội dung trong hàm ảo được định nghĩa ở class gốc sẽ được dùng nếu ta gọi  
+```  
+class Instrument
+{
+public:
+    virtual void makesound(){
+        cout << "make sound " << endl;
+    }
+};
+class Piano : public Instrument
+{
+    void makesound()
+    {
+        cout << "playing the piano" << endl;
+    }
+};
+class guitar : public Instrument
+{
+    void makesound()
+    {
+        cout << "playing the guitar" << endl;
+    }
+};
+class Ukelele : public Instrument
+{
+    void makesound()
+    {
+        cout << "playing the Ukelele" << endl;
+    }
+};
+int main(){
+    Instrument* p[3];
+    //trỏ đến các lớp con
+    p[0] = new Piano(); 
+    p[1] = new Guitar(); 
+    p[2] = new Ukelele(); 
+    for(int i = 0 ; i < 3 ;i++){
+        p[i]->makesound(); //in ra hàm ảo tương ứng với từng lớp con
+    }
+}
+```  
+### Pure virtual function (Hàm ảo thuần túy)  
+- Lúc này hàm ảo mà ta định nghĩa sẽ được gán giá trị bằng 0, và bắt buộc lớp con kế thừa phải cung cấp cách triển khai cụ thể
+- Khi 1 class chứa ít nhất 1 pure virtual function nó sẽ trở thành abstract class, nghĩa là ta sẽ không thể tạo ra 1 object từ class này  
+```  
+class Instrument
+{
+public:
+    virtual void makesound() = 0; 
+};
+int main(){
+    Instrument myInstrument; //wrong 
+    return 0;
+}
+```    
+
